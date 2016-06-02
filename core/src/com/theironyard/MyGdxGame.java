@@ -37,8 +37,8 @@ public class MyGdxGame extends ApplicationAdapter {
 	public void create () {
 		batch = new SpriteBatch();
 
-		//pulls and stores each sprite from tiles.png
-		//flips necessary sprite for animation purposes
+		/*pulls and stores each sprite from tiles.png
+		flips necessary sprite for animation purposes*/
 		Texture tiles = new Texture("tiles.png");
 		TextureRegion[][] grid = TextureRegion.split(tiles, WIDTH, HEIGHT);
 		down = grid[6][0];
