@@ -36,6 +36,9 @@ public class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
+
+		//pulls and stores each sprite from tiles.png
+		//flips necessary sprite for animation purposes
 		Texture tiles = new Texture("tiles.png");
 		TextureRegion[][] grid = TextureRegion.split(tiles, WIDTH, HEIGHT);
 		down = grid[6][0];
@@ -50,6 +53,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		right = grid[6][3];
 		left = new TextureRegion(right);
 		left.flip(true, false);
+
+
 		walkRight = new Animation(0.2f, right, stand);
 		walkLeft = new Animation(0.2f, left, standLeft);
 		walkUp = new Animation(0.2f, up, upFlip);
@@ -71,6 +76,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		TextureRegion img;
 
+
+		//determines animations/sprites to use for different movement scenarios
 		if (yv> V_STOP){
 			img = walkUp.getKeyFrame(time, true);
 		} else if (yv < -V_STOP) {
@@ -88,6 +95,9 @@ public class MyGdxGame extends ApplicationAdapter {
 		}
 
 
+
+		/* draws character sprite while checking if walking if the map.
+		if so, resets character to opposite edge*/
 
 		batch.begin();
 
@@ -113,6 +123,9 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	}
 
+	/*checks for button presses for each direction
+	also checks for space bar presses and adds according velocity modifier
+	 */
 	public void move () {
 		if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
 			if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
@@ -155,6 +168,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	}
 
+	// decreases velocity once button press has ended
 	public float decelerate (float velocity) {
 		velocity *= DECELERATION;
 		if (Math.abs(velocity)<1) {
