@@ -8,19 +8,27 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.sun.org.apache.xpath.internal.operations.Neg;
 
 public class MyGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
-	TextureRegion down, up, right, left, stand;
+	TextureRegion down, up, right, left, stand, standLeft, upFlip, downFlip;
+	boolean faceRight = true;
+	Animation walkRight;
+	Animation walkLeft;
+	Animation walkUp;
+	Animation walkDown;
+	float time;
 
 
 	static final int X_MAX = 800;
 	static final int Y_MAX = 600;
+	static final int NEG_BORDER = -35;
 	static final int WIDTH = 16;
 	static final int HEIGHT = 16;
 	static final int MAX_VELOCITY = 200;
 	static final float DECELERATION = 0.75f;
-	static final float DEFAULT = 10f;
+	static final float V_STOP = 10f;
 
 
 	float x, y, xv, yv;
@@ -31,11 +39,21 @@ public class MyGdxGame extends ApplicationAdapter {
 		Texture tiles = new Texture("tiles.png");
 		TextureRegion[][] grid = TextureRegion.split(tiles, WIDTH, HEIGHT);
 		down = grid[6][0];
+		downFlip = new TextureRegion(down);
+		downFlip.flip(true, false);
 		up = grid[6][1];
+		upFlip = new TextureRegion(up);
+		upFlip.flip(true, false);
 		stand = grid[6][2];
+		standLeft = new TextureRegion(stand);
+		standLeft.flip(true, false);
 		right = grid[6][3];
 		left = new TextureRegion(right);
 		left.flip(true, false);
+		walkRight = new Animation(0.2f, right, stand);
+		walkLeft = new Animation(0.2f, left, standLeft);
+		walkUp = new Animation(0.2f, up, upFlip);
+		walkDown = new Animation(0.2f, down, downFlip);
 
 
 
@@ -45,42 +63,49 @@ public class MyGdxGame extends ApplicationAdapter {
 	@Override
 	public void render () {
 		move();
+
+		time +=Gdx.graphics.getDeltaTime();
+
 		Gdx.gl.glClearColor(0.3f, 0.8f, 0.4f, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		TextureRegion img;
 
-		if (yv>DEFAULT){
-			img = up;
-		} else if (yv < -DEFAULT) {
-			img = down;
-		} else if (xv < -DEFAULT) {
-			img = left;
-		} else if (xv > DEFAULT) {
-			img = right;
+		if (yv> V_STOP){
+			img = walkUp.getKeyFrame(time, true);
+		} else if (yv < -V_STOP) {
+			img = walkDown.getKeyFrame(time, true);;
+		} else if (xv < -V_STOP) {
+			img = walkLeft.getKeyFrame(time, true);;
+		} else if (xv > V_STOP) {
+			img = walkRight.getKeyFrame(time, true);;
 		} else {
-			img = stand;
+			if (faceRight) {
+				img = stand;
+			} else {
+				img = standLeft;
+			}
 		}
 
 
 
 		batch.begin();
 
-		if ((x >= 0) && (x <= X_MAX) && (y >= 0) && (y <= Y_MAX)) {
+		if ((x >= NEG_BORDER) && (x <= X_MAX) && (y >= NEG_BORDER) && (y <= Y_MAX)) {
 			batch.draw(img, x, y, WIDTH*3, HEIGHT*3);
 
 		} else if (x > X_MAX) {
-			x = 0;
+			x = NEG_BORDER;
 			batch.draw(img, x, y, WIDTH*3, HEIGHT*3);
 
-		} else if (x < 0) {
+		} else if (x < NEG_BORDER) {
 			x = X_MAX;
 			batch.draw(img, x, y, WIDTH*3, HEIGHT*3);
 		} else if (y > Y_MAX) {
-			y = 0;
+			y = NEG_BORDER;
 			batch.draw(img, x, y, WIDTH*3, HEIGHT*3);
 
-		} else if (y < 0) {
+		} else if (y < NEG_BORDER) {
 			y = Y_MAX;
 			batch.draw(img, x, y, WIDTH*3, HEIGHT*3);
 		}
@@ -108,12 +133,14 @@ public class MyGdxGame extends ApplicationAdapter {
 			} else {
 				xv = MAX_VELOCITY;
 			}
+			faceRight = true;
 		} else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
 				xv = -MAX_VELOCITY * 1.5f;
 			} else {
 				xv = -MAX_VELOCITY;
 			}
+			faceRight = false;
 		}
 
 
